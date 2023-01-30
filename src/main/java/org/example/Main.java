@@ -2,16 +2,48 @@ package org.example;
 import java.io.*;
 import java.util.List;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 public class Main {
     public static void main(String[] args) {
 
-        textToCsv("Data/student-data.txt", "Data/students.csv");
-        xmlToCsv ("Data/coursedata.xml", "Data/coursedata.csv");
+  /*      textToCsv("Data/student-data.txt", "Data/students.csv");
+        xmlToCsv ("Data/coursedata.xml", "Data/coursedata.csv");*/
+        printStudentDataConsole("Data/students.csv") ;
     }
 
-    public static void printStudentData(String jsonFile) {
+    public static void printStudentDataConsole(String csvFilePath)  {
+
+        // create a CsvMapper and CsvSchema
+        CsvMapper mapper = new CsvMapper();
+        CsvSchema schema = CsvSchema.emptySchema().withHeader();
+
+// read from a file
+        File csvFile;
+        csvFile = new File(csvFilePath);
+        MappingIterator<Student> it = null;
+
+        // get the header
+        CsvSchema headerSchema = mapper.schemaFor(Student.class).withHeader();
+        List<String> header = headerSchema.getColumnNames();
+
+        try {
+            it = mapper.readerFor(Student.class).with(schema).readValues(csvFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+//print header
+        System.out.println("id Name Grade Email Address Region Country");
+// print the data to the console
+        while (it.hasNext()) {
+            System.out.println(it.next());
+
+        }
+    }
+    public static void printStudentCourseDetailsJson(String jsonFile) {
 
         //read json here
         //print student data

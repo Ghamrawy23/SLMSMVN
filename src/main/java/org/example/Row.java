@@ -52,6 +52,11 @@ public class Row {
         this.location = location;
     }
 
+    public String toString ()
+    {
+        return this.id + " " + this.courseName + " " + this.instructor + " " + this.courseDuration + " " + this.courseTime + " " + this.location ;
+    }
+
     @JsonProperty("id")
 
     String id ;
