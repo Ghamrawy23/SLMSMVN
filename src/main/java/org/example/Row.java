@@ -54,7 +54,7 @@ public class Row {
 
     public String toString ()
     {
-        return this.id + " " + this.courseName + " " + this.instructor + " " + this.courseDuration + " " + this.courseTime + " " + this.location ;
+        return this.id + ", \t" + this.courseName + ", \t" + this.instructor + ", \t" + this.courseDuration + ", \t" + this.courseTime + ", \t" + this.location ;
     }
 
     @JsonProperty("id")

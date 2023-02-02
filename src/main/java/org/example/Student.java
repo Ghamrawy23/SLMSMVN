@@ -19,7 +19,7 @@ public class Student {
 
     public String toString ()
     {
-        return this.id + " " + this.Name +  " " + this.Grade + " " + this.Email + " " + this.Address + " "+ this.Region + " " + this.Country ;
+        return this.id + ", \t" + this.Name +  ", \t" + this.Grade + ", \t" + this.Email + ", \t" + this.Address + ", \t"+ this.Region + ", \t" + this.Country ;
     }
     public String getId() {
         return id;
