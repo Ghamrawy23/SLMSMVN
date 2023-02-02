@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -17,20 +18,72 @@ public class Main {
 
     Student [] students ;
     Row [] courses ;
+
+    ObjectNode studentsCourses ;
+    Map<String, List<Long>> studentCourses1 ;
     public static void main(String[] args) {
 
         Main m = new Main () ;
 
         m.textToCsv("Data/student-data.txt", "Data/students.csv");
         m.xmlToCsv ("Data/coursedata.xml", "Data/coursedata.csv");
-        m.printStudentDataConsole("Data/students.csv") ;
+       /* m.printStudentDataConsole("Data/students.csv") ;
         m.printStudentCourseDetailsJson ("Data/Student course details.json", "122");
-        m.enrollStudentToCourse("70", "12", "Data/Student course details.json") ;
-    }
+*/  //      m.enrollStudentToCourse("72", "13", "Data/Student course details.json") ;
+    //    m.unenrollAndEnroll("Data/Student course details.json", "72", "13","9") ;
+        m.unenrollStudentFromCourse("Data/Student course details.json", "1", "1") ;
 
+    }
+    public void unenrollStudentFromCourse (String jsonPath, String studentId, String courseId)
+    {
+        readJson(jsonPath);
+        if (Integer.parseInt(studentId) > this.students.length || !this.studentCourses1.containsKey(studentId))
+        {
+            System.out.println("Student id is invalid or doesn't have any courses");
+            return ;
+        }
+        if (Integer.parseInt(courseId) > this.courses.length || !this.studentCourses1.get(studentId).contains(Integer.parseInt(courseId)))
+        {
+            System.out.println("Course id is invalid or doesn't exist for this student");
+            return ;
+        }
+
+        List tempCourses = this.studentCourses1.get(studentId) ;
+        Integer index = tempCourses.indexOf(Integer.parseInt(courseId)) ;
+        tempCourses.remove(index) ;
+        //this.studentCourses1.put(studentId, tempCourses) ;
+        writeJson(jsonPath);
+
+    }
+    public void unenrollAndEnroll(String jsonPath, String studentId, String courseId1, String courseId2){
+        readJson(jsonPath);
+
+        if (Integer.parseInt(studentId) > this.students.length || !this.studentCourses1.containsKey(studentId))
+        {
+            System.out.println("Student id is invalid or doesn't have any courses");
+            return ;
+        }
+
+       if (Integer.parseInt(courseId1) > this.courses.length || !this.studentCourses1.get(studentId).contains(Integer.parseInt(courseId1)))
+        {
+            System.out.println("Course id is invalid or doesn't exist for this student");
+            return ;
+        }
+     if (Integer.parseInt(courseId2) > this.courses.length || !this.studentCourses1.get(studentId).contains(Integer.parseInt(courseId1)))
+        {
+            System.out.println("Course id is invalid or already exist for this student");
+            return ;
+        }
+
+        List tempCourses = this.studentCourses1.get(studentId) ;
+        Integer index = tempCourses.indexOf(Integer.parseInt(courseId1)) ;
+        tempCourses.set(index, Integer.parseInt(courseId2)) ;
+       // this.studentCourses1.put(studentId, tempCourses) ;
+        writeJson(jsonPath);
+
+    }
         public void enrollStudentToCourse (String studentId, String courseId, String jsonPath)
         {
-
         //validation on ids
         if (Integer.parseInt(studentId) > this.students.length )
         {
@@ -43,7 +96,7 @@ public class Main {
             return ;
         }
 
-        //read json
+
         ObjectMapper mapper = new ObjectMapper();
 
         ObjectNode object;
@@ -155,21 +208,12 @@ public class Main {
     }
          public void printStudentCourseDetailsJson(String jsonPath, String studentId) {
 
-        ObjectMapper mapper = new ObjectMapper();
+        readJson(jsonPath);
 
-        ObjectNode object;
-        File jsonFile = new File(jsonPath);
-        try {
-            object = mapper.readValue(jsonFile, ObjectNode.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        Iterator<String> keys = object.fieldNames();
         //print header
         System.out.println("==================================================================================== \nStudent Details page \n==================================================================================== \n");
 
-//check if it exists in all students (valid or invalid)
+        //check if it exists in all students (valid or invalid)
         if (Integer.parseInt(studentId) - 1 <= this.students.length)
         {System.out.println("Name: " + this.students[Integer.parseInt(studentId) - 1].Name + "\tGrade: " + this.students[Integer.parseInt(studentId) - 1].Grade + "\tEmail: " + this.students[Integer.parseInt(studentId) - 1].Email);
         System.out.println("------------------------------------------------------------------------------------ \nEnrolled courses.\n");
@@ -178,15 +222,18 @@ public class Main {
             System.out.println("Invalid Student ID");
             return ;
         }
+
         Boolean notFound = true ;
-        while(notFound && keys.hasNext())
+        Iterator<String> keys = this.studentsCourses.fieldNames();
+
+             while(notFound && keys.hasNext())
         {
 
             String id = keys.next() ;
             if(id == studentId)
             {
                 int number = 0 ;
-                for ( JsonNode coursesData : object.get(id))
+                for ( JsonNode coursesData : studentsCourses.get(id))
                 {
                     System.out.println(++number + "- " + this.courses[coursesData.asInt()-1]) ;
                 }
@@ -311,5 +358,29 @@ public class Main {
                 e.printStackTrace();
             }
         }
+
+        public void readJson (String jsonPath)
+        {
+            File json = new File (jsonPath) ;
+            ObjectMapper mapper = new ObjectMapper();
+
+            try {
+                this.studentCourses1 = mapper.readValue(json, new TypeReference<Map<String, List<Long>>>() {});
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+    public void writeJson (String jsonPath)
+    {
+        File json = new File (jsonPath) ;
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            mapper.writeValue(json, this.studentCourses1);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }
