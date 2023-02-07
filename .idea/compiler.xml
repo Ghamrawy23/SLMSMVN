@@ -7,6 +7,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="SLMS_MVN" />
+        <module name="SLMSMVN" />
       </profile>
     </annotationProcessing>
   </component>
